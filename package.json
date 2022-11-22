@@ -10,7 +10,9 @@
   "license": "MIT",
   "dependencies": {
     "@azure/msal-node": "^1.0.0",
+    "dayjs": "^1.11.6",
     "dotenv": "^8.2.0",
+    "koa": "^2.13.4",
     "yargs": "^16.2.0"
   }
 }
