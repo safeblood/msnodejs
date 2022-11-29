@@ -24,6 +24,8 @@ const tokenRequest = {
 
 const apiConfig = {
 	uri: process.env.GRAPH_ENDPOINT + 'beta/users/bdo365@bioduro-sundia.com/calendar/getSchedule',
+	room_uri: process.env.GRAPH_ENDPOINT + 'beta/users/bdo365@bioduro-sundia.com/findRooms',
+	meeting_uri:process.env.GRAPH_ENDPOINT + 'v1.0/users/bdo365@bioduro-sundia.com/calendar/events',
 };
 
 /**
