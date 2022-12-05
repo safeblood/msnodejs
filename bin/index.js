@@ -11,6 +11,11 @@ const yargs = require("yargs");
 const fetch = require("./fetch");
 const auth = require("./auth");
 const Router = require("koa-router");
+const utc = require("dayjs/plugin/utc");
+const timezone = require("dayjs/plugin/timezone");
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("Asia/Shanghai");
 const home = new Router();
 // const options = yargs
 //     .usage('Usage: --op <operation_name>')
@@ -129,16 +134,40 @@ home
       process.env.GRAPH_ENDPOINT +
       `beta/users/${ctx.request.body.room}/calender/getSchedule`;
     scheduleBody.schedules[0] = ctx.request.body.room;
-    scheduleBody.startTime.dateTime = dayjs().subtract(1, "hours");
+    // scheduleBody.startTime.dateTime = dayjs().subtract(1, "hours");
+    scheduleBody.startTime.dateTime = dayjs();
     scheduleBody.endTime.dateTime = dayjs().add(24, "hours");
     const schedules = await fetch.callPostApi(
       uri,
       scheduleBody,
       authResponse.accessToken
     );
-    const {} = schedules;
     ctx.body = schedules;
-  });
+  })
+  .get("/calendars/:id", async (ctx) => {
+    const authResponse = await auth.getToken(auth.tokenRequest);
+    let uri =
+      process.env.GRAPH_ENDPOINT +
+      `v1.0/users/${ctx.params.id}@bioduro-sundia.com/calendars?$select=id`;
+    const token = authResponse.accessToken;
+    const calendars = await fetch.callGetApi(uri, token);
+    // ctx.body = calendars
+    calendarId = calendars.value[0].id;
+    uri =
+      process.env.GRAPH_ENDPOINT +
+      `v1.0/users/${
+        ctx.params.id
+      }@bioduro-sundia.com/calendars/${calendarId}/calendarView?startDateTime=${dayjs()
+        .subtract(2, "day")
+        .toISOString()}&endDateTime=${dayjs().add(2, "day").toISOString()}&$select=start,end,organizer`;
+    const calendarViews = await fetch.callGetApi(uri, token);
+    ctx.body = calendarViews;
+  })
+  .get("/calendar/:id",async (ctx) => {
+    const authResponse = await auth.getToken(auth.tokenRequest);
+    const uri = process.env.GRAPH_ENDPOINT + `v1.0/users/${ctx.params.id}@bioduro-sundia.com/calendars?$select=id`
+
+  })
 
 app.use(home.routes(), home.allowedMethods());
 app.listen(4000, () => console.log("start-quick is starting at port 4000"));
