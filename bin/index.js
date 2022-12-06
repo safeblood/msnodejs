@@ -158,16 +158,35 @@ home
       `v1.0/users/${
         ctx.params.id
       }@bioduro-sundia.com/calendars/${calendarId}/calendarView?startDateTime=${dayjs()
-        .subtract(2, "day")
-        .toISOString()}&endDateTime=${dayjs().add(2, "day").toISOString()}&$select=start,end,organizer`;
+        .subtract(2, "hour")
+        .toISOString()}&endDateTime=${dayjs()
+        .add(1, "day")
+        .toISOString()}&$select=start,end,organizer&$orderby=end/dateTime`;
     const calendarViews = await fetch.callGetApi(uri, token);
     ctx.body = calendarViews;
   })
-  .get("/calendar/:id",async (ctx) => {
+  .get("/calendar/:id", async (ctx) => {
     const authResponse = await auth.getToken(auth.tokenRequest);
-    const uri = process.env.GRAPH_ENDPOINT + `v1.0/users/${ctx.params.id}@bioduro-sundia.com/calendars?$select=id`
-
+    const uri =
+      process.env.GRAPH_ENDPOINT +
+      `v1.0/users/${ctx.params.id}@bioduro-sundia.com/calendars?$select=id`;
+    const calendarId = await fetch.callGetApi(uri, authResponse.accessToken);
+    ctx.body = calendarId.value[0];
   })
+  .get("/calendars/:id/:roomId", async (ctx) => {
+    const authResponse = await auth.getToken(auth.tokenRequest);
+    let uri =
+      process.env.GRAPH_ENDPOINT +
+      `v1.0/users/${ctx.params.id}@bioduro-sundia.com/calendars/${
+        ctx.params.roomId
+      }/calendarView?startDateTime=${dayjs()
+        .subtract(1, "hour")
+        .toISOString()}&endDateTime=${dayjs()
+        .add(1, "day")
+        .toISOString()}&$select=start,end,organizer&$orderby=end/dateTime`;
+    const calendarViews = await fetch.callGetApi(uri,authResponse.accessToken)
+    ctx.body = calendarViews
+  });
 
 app.use(home.routes(), home.allowedMethods());
 app.listen(4000, () => console.log("start-quick is starting at port 4000"));
