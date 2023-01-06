@@ -152,7 +152,7 @@ home
     const token = authResponse.accessToken;
     const calendars = await fetch.callGetApi(uri, token);
     // ctx.body = calendars
-    calendarId = calendars.value[0].id;
+    let calendarId = calendars.value[0].id;
     uri =
       process.env.GRAPH_ENDPOINT +
       `v1.0/users/${
